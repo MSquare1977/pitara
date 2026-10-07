@@ -40,7 +40,7 @@ Living list of what's built, what's next, and what's further out. Add to this as
 
 ## 🔜 Next up
 
-- [ ] **Phase 4 — Web version + Firebase backend** — architecture agreed, not yet built. Full design in `PHASE4_ARCHITECTURE.md`: Firebase (Auth + Firestore + Cloud Storage) as the backend, client-side encryption with a passphrase-wrapped key (no recovery), web app is upload-only (categories/people stay app-authoritative), auth migrates from bare `google_sign_in` to `firebase_auth` as groundwork for adding Apple Sign-In later
+- [ ] **Phase 4 — Web version + Firebase backend + Free/Paid tiers** — architecture and business model agreed, not yet built. Full design in `PHASE4_ARCHITECTURE.md`: Firebase (Auth + Firestore + Cloud Storage) backend, passphrase-wrapped key encryption (no recovery), free local-only tier vs. paid cloud tier chosen on first launch or via drawer, Stripe web-only payment to start (mobile hands off to system browser), family sharing with per-folder public-key encryption + mutual-delete confirmation (its own later sub-phase), TOTP-only MFA for cloud login and share-accepting, auth migrates from bare `google_sign_in` to `firebase_auth`
 
 ## 🧭 Later / bigger pieces
 
