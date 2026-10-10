@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
+import '../theme/app_theme.dart';
 import 'home_screen.dart';
 
 /// Defers entirely to whatever the device already uses — Face ID,
@@ -84,30 +85,91 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     if (_unlocked) return const HomeScreen();
 
-    final scheme = Theme.of(context).colorScheme;
+    // Always navy + brass (like the splash screen), regardless of light/dark
+    // mode — the lock screen is the first impression and should feel like
+    // a vault door, not a form.
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.lock_outline, size: 48, color: scheme.primary),
-              const SizedBox(height: 16),
-              const Text('Pitara is locked',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 16),
-              if (_error != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(_error!, style: TextStyle(color: scheme.error, fontSize: 13)),
-                ),
-              FilledButton.icon(
-                onPressed: _authenticating ? null : _attemptUnlock,
-                icon: const Icon(Icons.fingerprint),
-                label: Text(_authenticating ? 'Checking...' : 'Unlock'),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppTheme.navy700, AppTheme.navy800, AppTheme.navy900],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 112,
+                    height: 112,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppTheme.brassLight.withValues(alpha: 0.10),
+                      border: Border.all(
+                        color: AppTheme.brassLight.withValues(alpha: 0.45),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.brassLight.withValues(alpha: 0.22),
+                          blurRadius: 40,
+                          spreadRadius: 4,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(Icons.lock_rounded, size: 52, color: AppTheme.brassLight),
+                  ),
+                  const SizedBox(height: 28),
+                  const Text(
+                    'Pitara',
+                    style: TextStyle(
+                      fontFamily: AppTheme.serif,
+                      fontSize: 40,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.ivory,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Your documents, locked down.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      letterSpacing: 0.4,
+                      color: AppTheme.ivory.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  if (_error != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text(
+                        _error!,
+                        style: const TextStyle(color: Color(0xFFFF8A80), fontSize: 13),
+                      ),
+                    ),
+                  SizedBox(
+                    width: 240,
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.brassLight,
+                        foregroundColor: AppTheme.navy800,
+                      ),
+                      onPressed: _authenticating ? null : _attemptUnlock,
+                      icon: const Icon(Icons.fingerprint),
+                      label: Text(_authenticating ? 'Checking...' : 'Unlock'),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

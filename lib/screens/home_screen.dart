@@ -12,6 +12,7 @@ import '../providers/member_provider.dart';
 import '../providers/theme_provider.dart';
 import '../services/encryption_service.dart';
 import '../services/share_export_service.dart';
+import '../theme/app_theme.dart';
 import '../utils/document_search.dart';
 import '../utils/storage_size.dart';
 import '../widgets/category_tile.dart';
@@ -227,9 +228,15 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(color: scheme.surfaceContainerHigh),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF22386B), AppTheme.navy800, Color(0xFF0E182E)],
+                ),
+              ),
               child: authProvider.loading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(child: CircularProgressIndicator(color: AppTheme.brassLight))
                   : authProvider.isSignedIn
                       ? Row(
                           children: [
@@ -250,12 +257,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                 children: [
                                   Text(
                                     authProvider.user!.displayName ?? 'Signed in',
-                                    style: const TextStyle(fontWeight: FontWeight.w600),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppTheme.ivory,
+                                    ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   Text(
                                     authProvider.user!.email,
-                                    style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: AppTheme.ivory.withValues(alpha: 0.7),
+                                    ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
@@ -269,16 +283,23 @@ class _HomeScreenState extends State<HomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
+                              const Text(
                                 'Pitara',
                                 style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w600,
-                                  color: scheme.onSurface,
+                                  fontFamily: AppTheme.serif,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppTheme.ivory,
                                 ),
                               ),
                               const SizedBox(height: 8),
                               OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppTheme.brassLight,
+                                  side: BorderSide(
+                                    color: AppTheme.brassLight.withValues(alpha: 0.6),
+                                  ),
+                                ),
                                 onPressed: () async {
                                   try {
                                     await authProvider.signIn();
@@ -353,6 +374,202 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// "Manish's Vault" once signed in, "Your Vault" otherwise.
+  String _vaultTitle(AuthProvider auth) {
+    if (!auth.isSignedIn) return 'Your Vault';
+    final user = auth.user!;
+    final source = (user.displayName ?? '').trim().isNotEmpty
+        ? user.displayName!.trim()
+        : user.email.split('@').first;
+    final first =
+        source.split(RegExp(r'[\s._\-]+')).firstWhere((t) => t.isNotEmpty, orElse: () => '');
+    if (first.isEmpty) return 'Your Vault';
+    return "${first[0].toUpperCase()}${first.substring(1)}'s Vault";
+  }
+
+  Widget _heroIconButton({
+    required IconData icon,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) {
+    return IconButton(
+      onPressed: onPressed,
+      tooltip: tooltip,
+      style: IconButton.styleFrom(
+        backgroundColor: Colors.white.withValues(alpha: 0.10),
+        foregroundColor: AppTheme.brassLight,
+        minimumSize: const Size(42, 42),
+      ),
+      icon: Icon(icon, size: 20),
+    );
+  }
+
+  Widget _heroPill(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: AppTheme.brassLight),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w500,
+              color: AppTheme.ivory.withValues(alpha: 0.9),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// The bold navy card at the top: greeting, "{Name}'s Vault" with a shield,
+  /// the action buttons, and quick facts about what's inside.
+  Widget _buildHero(
+    BuildContext context,
+    DocumentProvider documentProvider,
+    List<VaultDocument> expiring,
+  ) {
+    final auth = context.watch<AuthProvider>();
+    final docCount = documentProvider.all.length;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 14, 14, 18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF22386B), AppTheme.navy800, Color(0xFF0E182E)],
+        ),
+        border: Border.all(color: AppTheme.brassLight.withValues(alpha: 0.30)),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.navy800.withValues(alpha: 0.35),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  _greeting().toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 11,
+                    letterSpacing: 1.8,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.brassLight.withValues(alpha: 0.85),
+                  ),
+                ),
+              ),
+              if (!_editMode) ...[
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    _heroIconButton(
+                      icon: Icons.notifications_outlined,
+                      tooltip: 'Alerts',
+                      onPressed: () => _showExpiringDialog(context, expiring),
+                    ),
+                    if (expiring.isNotEmpty)
+                      Positioned(
+                        top: 6,
+                        right: 6,
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFF6B5E),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppTheme.navy800, width: 1.5),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(width: 6),
+              ],
+              _heroIconButton(
+                icon: _editMode ? Icons.check : Icons.edit_outlined,
+                tooltip: _editMode ? 'Done' : 'Edit categories',
+                onPressed: () => setState(() => _editMode = !_editMode),
+              ),
+              const SizedBox(width: 6),
+              _heroIconButton(
+                icon: Icons.menu,
+                tooltip: 'Menu',
+                onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    _vaultTitle(auth),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: AppTheme.serif,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w700,
+                      height: 1.15,
+                      color: AppTheme.ivory,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Icon(Icons.verified_user_rounded, size: 26, color: AppTheme.brassLight),
+              ],
+            ),
+          ),
+          if (!_editMode) ...[
+            const SizedBox(height: 14),
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _heroPill(Icons.lock_outline, 'Files AES-256 encrypted'),
+                  _heroPill(
+                    Icons.description_outlined,
+                    '$docCount document${docCount == 1 ? '' : 's'}',
+                  ),
+                  FutureBuilder<int>(
+                    future: _storageFuture,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return const SizedBox.shrink();
+                      return _heroPill(
+                        Icons.storage_outlined,
+                        '${formatStorageSize(snapshot.data!)} used',
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final documentProvider = context.watch<DocumentProvider>();
@@ -382,77 +599,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(_greeting(),
-                            style: TextStyle(fontSize: 13, color: scheme.onSurfaceVariant)),
-                        const SizedBox(height: 2),
-                        const Text('Your vault',
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-                        if (!_editMode)
-                          FutureBuilder<int>(
-                            future: _storageFuture,
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) return const SizedBox.shrink();
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 2),
-                                child: Text(
-                                  '${formatStorageSize(snapshot.data!)} used',
-                                  style: TextStyle(fontSize: 11, color: scheme.onSurfaceVariant),
-                                ),
-                              );
-                            },
-                          ),
-                      ],
-                    ),
-                  ),
-                  if (!_editMode) ...[
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        IconButton.filledTonal(
-                          onPressed: () => _showExpiringDialog(context, expiring),
-                          icon: const Icon(Icons.notifications_outlined, size: 20),
-                          tooltip: 'Alerts',
-                        ),
-                        if (expiring.isNotEmpty)
-                          Positioned(
-                            top: -2,
-                            right: -2,
-                            child: Container(
-                              width: 10,
-                              height: 10,
-                              decoration: BoxDecoration(
-                                color: scheme.error,
-                                shape: BoxShape.circle,
-                                border: Border.all(color: scheme.surface, width: 1.5),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                  IconButton.filledTonal(
-                    onPressed: () => setState(() => _editMode = !_editMode),
-                    icon: Icon(_editMode ? Icons.check : Icons.edit_outlined, size: 20),
-                    tooltip: _editMode ? 'Done' : 'Edit categories',
-                  ),
-                  const SizedBox(width: 8),
-                  // Dark mode, backup, people all live in here now, instead
-                  // of as separate header icons.
-                  IconButton.filledTonal(
-                    onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-                    icon: const Icon(Icons.menu, size: 20),
-                    tooltip: 'Menu',
-                  ),
-                ],
-              ),
+              _buildHero(context, documentProvider, expiring),
               const SizedBox(height: 16),
               if (!_editMode)
                 TextField(
@@ -460,7 +607,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onChanged: (value) => setState(() => _searchQuery = value),
                   decoration: InputDecoration(
                     hintText: 'Search documents',
-                    prefixIcon: const Icon(Icons.search, size: 20),
+                    prefixIcon: Icon(Icons.search, size: 22, color: scheme.primary),
                     suffixIcon: isSearching
                         ? IconButton(
                             icon: const Icon(Icons.close, size: 18),
@@ -470,13 +617,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             },
                           )
                         : null,
-                    filled: true,
-                    fillColor: scheme.surfaceContainerHigh,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
                   ),
                 )
               else
@@ -528,7 +668,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             crossAxisCount: columns,
                             mainAxisSpacing: 10,
                             crossAxisSpacing: 10,
-                            childAspectRatio: 1.4,
+                            childAspectRatio: 1.15,
                           );
 
                           return !_editMode

@@ -6,6 +6,7 @@ import 'providers/document_provider.dart';
 import 'providers/member_provider.dart';
 import 'providers/theme_provider.dart';
 import 'screens/lock_screen.dart';
+import 'theme/app_theme.dart';
 
 void main() async {
   // Needed before any plugin (shared_preferences, local_auth) can be used
@@ -42,10 +43,6 @@ void main() async {
 class PitaraApp extends StatelessWidget {
   const PitaraApp({super.key});
 
-  // A more saturated seed than Material 3's muted default.
-  static const _seedLight = Color(0xFFB8860B);
-  static const _seedDark = Color(0xFFF0C14B);
-
   @override
   Widget build(BuildContext context) {
     final themeMode = context.watch<ThemeProvider>().mode;
@@ -54,20 +51,8 @@ class PitaraApp extends StatelessWidget {
       title: 'Pitara',
       debugShowCheckedModeBanner: false,
       themeMode: themeMode,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: _seedLight,
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: _seedDark,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
       home: const LockScreen(),
     );
   }

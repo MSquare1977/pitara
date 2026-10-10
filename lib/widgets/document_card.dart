@@ -26,70 +26,89 @@ class DocumentCard extends StatelessWidget {
       }
     }
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        margin: const EdgeInsets.only(bottom: 8),
-        decoration: BoxDecoration(
-          color: scheme.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isWarning ? scheme.error.withValues(alpha: 0.5) : scheme.outlineVariant,
-            width: 0.6,
-          ),
+    final isDark = scheme.brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: scheme.surfaceContainerHigh,
+        border: Border.all(
+          color: isWarning
+              ? scheme.error.withValues(alpha: 0.6)
+              : scheme.primary.withValues(alpha: 0.22),
+          width: 1,
         ),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: isWarning
-                    ? scheme.errorContainer
-                    : scheme.primaryContainer,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                Icons.description_outlined,
-                size: 18,
-                color: isWarning ? scheme.onErrorContainer : scheme.onPrimaryContainer,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(document.title,
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                  if (document.subtitle != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      document.subtitle!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isWarning ? scheme.error : scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            if (member != null) ...[
-              CircleAvatar(
-                radius: 10,
-                backgroundColor: member.color,
-                child: Text(
-                  member.name.isNotEmpty ? member.name[0].toUpperCase() : '?',
-                  style: const TextStyle(fontSize: 9, color: Colors.white),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.30 : 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: isWarning
+                        ? scheme.errorContainer
+                        : scheme.primary.withValues(alpha: isDark ? 0.16 : 0.12),
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child: Icon(
+                    Icons.description_outlined,
+                    size: 22,
+                    color: isWarning ? scheme.onErrorContainer : scheme.primary,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 6),
-            ],
-            Icon(Icons.chevron_right, size: 18, color: scheme.onSurfaceVariant),
-          ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        document.title,
+                        style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
+                      ),
+                      if (document.subtitle != null) ...[
+                        const SizedBox(height: 3),
+                        Text(
+                          document.subtitle!,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: isWarning ? scheme.error : scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (member != null) ...[
+                  CircleAvatar(
+                    radius: 11,
+                    backgroundColor: member.color,
+                    child: Text(
+                      member.name.isNotEmpty ? member.name[0].toUpperCase() : '?',
+                      style: const TextStyle(fontSize: 10, color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                Icon(Icons.chevron_right_rounded, size: 22, color: scheme.onSurfaceVariant),
+              ],
+            ),
+          ),
         ),
       ),
     );
