@@ -19,10 +19,14 @@ class AddEditDocumentScreen extends StatefulWidget {
   final String categoryId;
   final VaultDocument? existingDocument;
 
+  /// Pre-fills the title when adding (used when attaching a document to a checklist row).
+  final String? initialTitle;
+
   const AddEditDocumentScreen({
     super.key,
     required this.categoryId,
     this.existingDocument,
+    this.initialTitle,
   });
 
   bool get isEditing => existingDocument != null;
@@ -47,7 +51,9 @@ class _AddEditDocumentScreenState extends State<AddEditDocumentScreen> {
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.existingDocument?.title ?? '');
+    _titleController = TextEditingController(
+      text: widget.existingDocument?.title ?? widget.initialTitle ?? '',
+    );
     _expiryDate = widget.existingDocument?.expiryDate;
     _memberId = widget.existingDocument?.memberId;
   }
@@ -174,7 +180,8 @@ class _AddEditDocumentScreenState extends State<AddEditDocumentScreen> {
     );
 
     widget.isEditing ? await provider.updateDocument(doc) : await provider.addDocument(doc);
-    if (mounted) Navigator.pop(context);
+    // Return the saved document so a caller (the checklist) can link it to a row.
+    if (mounted) Navigator.pop(context, doc);
   }
 
   @override

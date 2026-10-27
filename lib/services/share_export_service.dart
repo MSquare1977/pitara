@@ -6,6 +6,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/category.dart';
 import '../models/document.dart';
+import '../models/planned_item.dart';
+import '../utils/checklist_rows.dart';
 import 'encryption_service.dart';
 import 'file_vault_service.dart';
 
@@ -74,6 +76,7 @@ class ShareExportService {
   Future<void> exportFullBackup({
     required List<VaultDocument> documents,
     required List<DocCategory> categories,
+    List<PlannedItem> plannedItems = const [],
   }) async {
     final categoryNameById = {for (final c in categories) c.id: c.name};
     final archive = Archive();
@@ -107,6 +110,23 @@ class ShareExportService {
       final safeName = doc.title.replaceAll(RegExp(r'[^\w\s-]'), '').trim();
       final entryName = '$categoryName/$safeName.$extension';
       archive.addFile(ArchiveFile(entryName, bytes.length, bytes));
+    }
+
+    // The checklist: every document plus the user's placeholder rows.
+    if (plannedItems.isNotEmpty) {
+      final checklist = buildChecklistRows(
+        documents: documents,
+        categories: categories,
+        plannedItems: plannedItems,
+      );
+      final added = checklist.where((r) => r.status == ChecklistStatus.added).length;
+      manifestLines
+        ..add('')
+        ..add('Checklist: $added of ${checklist.length} added');
+      for (final row in checklist) {
+        final tag = row.status == ChecklistStatus.added ? 'Added' : 'To add';
+        manifestLines.add('- [$tag] ${row.title} (${row.folderName})');
+      }
     }
 
     final manifestBytes = manifestLines.join('\n').codeUnits;

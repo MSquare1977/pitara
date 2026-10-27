@@ -9,6 +9,7 @@ import '../providers/auth_provider.dart';
 import '../providers/category_provider.dart';
 import '../providers/document_provider.dart';
 import '../providers/member_provider.dart';
+import '../providers/planned_item_provider.dart';
 import '../providers/theme_provider.dart';
 import '../services/encryption_service.dart';
 import '../services/share_export_service.dart';
@@ -20,6 +21,7 @@ import '../widgets/document_card.dart';
 import 'category_screen.dart';
 import 'add_category_screen.dart';
 import 'document_detail_screen.dart';
+import 'checklist_screen.dart';
 import 'manage_people_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -118,6 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
       await _shareExport.exportFullBackup(
         documents: documentProvider.all,
         categories: categoryProvider.categories,
+        plannedItems: context.read<PlannedItemProvider>().items,
       );
       await _recordBackupTime();
     } catch (e) {
@@ -221,6 +224,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final themeProvider = context.watch<ThemeProvider>();
     final expiring = context.watch<DocumentProvider>().expiringSoon;
     final authProvider = context.watch<AuthProvider>();
+    final checklistToAdd = context
+        .watch<PlannedItemProvider>()
+        .toAddCount(context.watch<DocumentProvider>().all.map((d) => d.id));
 
     return Drawer(
       child: SafeArea(
@@ -365,6 +371,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const ManagePeopleScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.fact_check_outlined),
+              title: const Text('Checklist'),
+              subtitle: Text(
+                checklistToAdd == 0 ? 'Index of everything in your vault' : '$checklistToAdd to add',
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ChecklistScreen()),
                 );
               },
             ),

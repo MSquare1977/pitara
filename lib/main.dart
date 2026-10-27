@@ -4,6 +4,7 @@ import 'providers/auth_provider.dart';
 import 'providers/category_provider.dart';
 import 'providers/document_provider.dart';
 import 'providers/member_provider.dart';
+import 'providers/planned_item_provider.dart';
 import 'providers/theme_provider.dart';
 import 'screens/lock_screen.dart';
 import 'theme/app_theme.dart';
@@ -16,12 +17,14 @@ void main() async {
   final documentProvider = DocumentProvider();
   final categoryProvider = CategoryProvider();
   final memberProvider = MemberProvider();
+  final plannedItemProvider = PlannedItemProvider();
 
   // Load persisted data from disk before the UI ever builds, so the first
   // frame already shows real saved documents/categories, not empty state.
   await documentProvider.load();
   await categoryProvider.load();
   await memberProvider.load();
+  await plannedItemProvider.load();
 
   runApp(
     MultiProvider(
@@ -29,6 +32,7 @@ void main() async {
         ChangeNotifierProvider.value(value: documentProvider),
         ChangeNotifierProvider.value(value: categoryProvider),
         ChangeNotifierProvider.value(value: memberProvider),
+        ChangeNotifierProvider.value(value: plannedItemProvider),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         // Unlike the data providers above, this doesn't need to finish
         // before the first frame — sign-in state can resolve in the
